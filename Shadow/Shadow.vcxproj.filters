@@ -27,9 +27,15 @@
     <ClInclude Include="src\Shadow\EntryPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Shadow\log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Shadow\Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shadow\log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
