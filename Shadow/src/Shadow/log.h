@@ -29,8 +29,8 @@ namespace Shadow
 #define SHADOW_ENGINE_FATAL(...)   ::Shadow::Log::GetEngineLogger()->fatal(__VA_ARGS__)
 
 //Application log macros
-#define SHADOW_APP_TRACE(...)      ::Shadow::Log::GetAppLogger()->trace(__VA_ARGS__)
-#define SHADOW_APP_INFO(...)       ::Shadow::Log::GetAppLogger()->info(__VA_ARGS__)
-#define SHADOW_APP_WARN(...)       ::Shadow::Log::GetAppLogger()->warn(__VA_ARGS__)
-#define SHADOW_APP_ERROR(...)      ::Shadow::Log::GetAppLogger()->error(__VA_ARGS__)
-#define SHADOW_APP_FATAL(...)      ::Shadow::Log::GetAppLogger()->fatal(__VA_ARGS__)
+#define SHADOW_TRACE(...)      ::Shadow::Log::GetAppLogger()->trace(__VA_ARGS__)
+#define SHADOW_INFO(...)       ::Shadow::Log::GetAppLogger()->info(__VA_ARGS__)
+#define SHADOW_WARN(...)       ::Shadow::Log::GetAppLogger()->warn(__VA_ARGS__)
+#define SHADOW_ERROR(...)      ::Shadow::Log::GetAppLogger()->error(__VA_ARGS__)
+#define SHADOW_FATAL(...)      ::Shadow::Log::GetAppLogger()->fatal(__VA_ARGS__)

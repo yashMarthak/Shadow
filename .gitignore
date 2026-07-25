@@ -1,7 +1,10 @@
 # Directories
 .vs/
 bin/
-bin-int/
+temp/
 
 # Files
+*.slnx
 *.user
+*.vcxproj
+*.vcxproj.filters
