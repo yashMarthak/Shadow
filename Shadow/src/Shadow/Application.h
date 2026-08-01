@@ -1,17 +1,17 @@
 #pragma once
-#include "config.h"
 
-namespace Shadow
+SHADOW_BEGIN_NAMESPACE
+	
+class SHADOW_API Application
 {
-	class SHADOW_API Application
-	{
-	public:
-		Application();
-		virtual ~Application();
+public:
+	Application();
+	virtual ~Application();
 
-		void Run();
-	};
+	void Run();
+};
 
-	// To be defined in CLIENT
-	Application* CreateApplication();
-}
+// To be defined in CLIENT
+Application* CreateApplication();
+
+SHADOW_END_NAMESPACE

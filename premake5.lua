@@ -18,6 +18,9 @@ project "Shadow"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("temp/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "precomp.h"
+    pchsource "Shadow/src/precomp.cpp"
+
     files
     {
         "%{prj.name}/src/**.h",
@@ -26,6 +29,7 @@ project "Shadow"
 
     includedirs
     {
+        "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include"
     }
 

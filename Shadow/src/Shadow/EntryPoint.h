@@ -7,7 +7,6 @@ extern Shadow::Application* Shadow::CreateApplication();
 int main(int argc, char** argv)
 {
 	Shadow::Log::Init();
-	SHADOW_ENGINE_INFO("Hello Engine");
 	SHADOW_WARN("Hello Application");
 
 	auto app = Shadow::CreateApplication();

@@ -1,36 +1,28 @@
 #pragma once
 
-#include "config.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
 
-namespace Shadow
+SHADOW_BEGIN_NAMESPACE
+
+class SHADOW_API Log
 {
-	class SHADOW_API Log
-	{
-	public:
-		Log() = default;
-		~Log() = default;
+public:
+	Log() = default;
+	~Log() = default;
 
-		static void Init();
-		inline static std::shared_ptr<spdlog::logger>& GetEngineLogger() { return m_EngineLogger; }
-		inline static std::shared_ptr<spdlog::logger>& GetAppLogger() { return m_AppLogger; }
+	static void Init();
+	inline static std::shared_ptr<spdlog::logger>& GetLogger() { return m_Logger; }
 
-	private:
-		static std::shared_ptr<spdlog::logger> m_EngineLogger;
-		static std::shared_ptr<spdlog::logger> m_AppLogger;
-	};
-}
+private:
+	static std::shared_ptr<spdlog::logger> m_Logger;
+};
 
-//Engine log macros
-#define SHADOW_ENGINE_TRACE(...)   ::Shadow::Log::GetEngineLogger()->trace(__VA_ARGS__)
-#define SHADOW_ENGINE_INFO(...)    ::Shadow::Log::GetEngineLogger()->info(__VA_ARGS__)
-#define SHADOW_ENGINE_WARN(...)    ::Shadow::Log::GetEngineLogger()->warn(__VA_ARGS__)
-#define SHADOW_ENGINE_ERROR(...)   ::Shadow::Log::GetEngineLogger()->error(__VA_ARGS__)
-#define SHADOW_ENGINE_FATAL(...)   ::Shadow::Log::GetEngineLogger()->fatal(__VA_ARGS__)
+SHADOW_END_NAMESPACE
 
 //Application log macros
-#define SHADOW_TRACE(...)      ::Shadow::Log::GetAppLogger()->trace(__VA_ARGS__)
-#define SHADOW_INFO(...)       ::Shadow::Log::GetAppLogger()->info(__VA_ARGS__)
-#define SHADOW_WARN(...)       ::Shadow::Log::GetAppLogger()->warn(__VA_ARGS__)
-#define SHADOW_ERROR(...)      ::Shadow::Log::GetAppLogger()->error(__VA_ARGS__)
-#define SHADOW_FATAL(...)      ::Shadow::Log::GetAppLogger()->fatal(__VA_ARGS__)
+#define SHADOW_TRACE(...)      ::Shadow::Log::GetLogger()->trace(__VA_ARGS__)
+#define SHADOW_INFO(...)       ::Shadow::Log::GetLogger()->info(__VA_ARGS__)
+#define SHADOW_WARN(...)       ::Shadow::Log::GetLogger()->warn(__VA_ARGS__)
+#define SHADOW_ERROR(...)      ::Shadow::Log::GetLogger()->error(__VA_ARGS__)
+#define SHADOW_FATAL(...)      ::Shadow::Log::GetLogger()->fatal(__VA_ARGS__)
