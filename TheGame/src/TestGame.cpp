@@ -3,16 +3,16 @@
 class TheGame : public Shadow::Application
 {
 public:
-	TheGame()
-	{
-	}
+    TheGame()
+    {
+    }
 
-	~TheGame()
-	{
-	}
+    ~TheGame()
+    {
+    }
 };
 
 Shadow::Application* Shadow::CreateApplication()
 {
-	return new TheGame();
+    return new TheGame();
 }

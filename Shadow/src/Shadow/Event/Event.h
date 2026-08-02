@@ -1,5 +1,4 @@
 #pragma once
-#include "precomp.h"
 #include "spdlog/fmt/ostr.h"
 
 SHADOW_BEGIN_NAMESPACE

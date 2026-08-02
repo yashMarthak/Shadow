@@ -1,5 +1,4 @@
 #pragma once
-#include "precomp.h"
 #include "Shadow/Event/Event.h"
 
 SHADOW_BEGIN_NAMESPACE

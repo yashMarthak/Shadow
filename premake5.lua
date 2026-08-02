@@ -21,6 +21,8 @@ project "Shadow"
     pchheader "precomp.h"
     pchsource "Shadow/src/precomp.cpp"
 
+    forceincludes { "precomp.h" }
+
     files
     {
         "%{prj.name}/src/**.h",

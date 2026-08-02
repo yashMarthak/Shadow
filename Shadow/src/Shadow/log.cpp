@@ -8,10 +8,10 @@ std::shared_ptr<spdlog::logger> Log::m_Logger;
 
 void Log::Init()
 {
-	spdlog::set_pattern("%^[%T] %n: %v%$");
+    spdlog::set_pattern("%^[%T] %n: %v%$");
 
-	m_Logger = spdlog::stdout_color_mt("SHADOW");
-	m_Logger->set_level(spdlog::level::trace);
+    m_Logger = spdlog::stdout_color_mt("SHADOW");
+    m_Logger->set_level(spdlog::level::trace);
 }
 
 SHADOW_END_NAMESPACE
