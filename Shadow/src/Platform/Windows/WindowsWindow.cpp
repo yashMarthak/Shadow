@@ -1,10 +1,13 @@
 #include "precomp.h"
 
+#ifdef SHADOW_PLATFORM_WINDOWS
+
 #include "WindowsWindow.h"
-#include "Shadow\Event\ApplicationEvent.h"
-#include <Windows.h>
+#include "Shadow/Event/ApplicationEvent.h"
 
 SHADOW_BEGIN_NAMESPACE
+
+static bool s_WindowInitialized = false;
 
 Window* Window::Create(const WindowProps& props)
 {
@@ -23,20 +26,30 @@ WindowsWindow::~WindowsWindow()
 
 void WindowsWindow::Init(const WindowProps& props)
 {
+    if (s_WindowInitialized)
+    {
+        SHADOW_LOG_ERROR("Window already initialized!");
+        return;
+    }
+
     m_Data.Title = props.Title;
     m_Data.Width = props.Width;
     m_Data.Height = props.Height;
+    m_Data.VSync = props.VSync;
+
+    SHADOW_LOG_INFO("Creating window: ({0}, {1})", m_Data.Width, m_Data.Height);
 
     WNDCLASS wc = {};
     wc.lpfnWndProc = WindowsWindow::WindowProc;
     wc.hInstance = GetModuleHandle(nullptr);
     wc.lpszClassName = L"ShadowWindowClass";
-    RegisterClass(&wc);
+    ATOM classAtom = RegisterClass(&wc);
+    SHADOW_ASSERT(classAtom, "Failed to register window class!");
 
     m_WindowHandle = CreateWindowEx(
         0,
         L"ShadowWindowClass",
-        (LPCWSTR)m_Data.Title.c_str(),
+        m_Data.Title.c_str(),
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, m_Data.Width, m_Data.Height,
         nullptr,
@@ -44,16 +57,23 @@ void WindowsWindow::Init(const WindowProps& props)
         GetModuleHandle(nullptr),
         this
     );
+    SHADOW_ASSERT(m_WindowHandle, "Failed to create window! Last Error: {0}", GetLastError());
+    
+    SHADOW_LOG_INFO("Window created successfully!");
     ShowWindow(m_WindowHandle, SW_SHOW);
+
+    s_WindowInitialized = true;
 }
 
 void WindowsWindow::Shutdown()
 {
+    SHADOW_LOG_INFO("Destroying window: ({0}, {1})", m_Data.Width, m_Data.Height);
     DestroyWindow(m_WindowHandle);
 }
 
 void WindowsWindow::SetVSync(bool enabled)
 {
+    SHADOW_LOG_TRACE("Setting VSync: {0}", enabled);
     m_Data.VSync = enabled;
 }
 
@@ -67,16 +87,16 @@ void WindowsWindow::OnUpdate()
     }
 }
 
-void WindowsWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT WindowsWindow::HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
     case WM_CLOSE:
     {
         WindowCloseEvent event;
-        //m_Data.EventCallback(event);
+        m_Data.EventCallback(event);
         SHADOW_LOG_INFO("Window Close Event Triggered");
-        break;
+        return 0;
     }
     case WM_SIZE:
     {
@@ -85,27 +105,28 @@ void WindowsWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
         m_Data.Width = width;
         m_Data.Height = height;
         WindowResizeEvent event(width, height);
-        //m_Data.EventCallback(event);
+        m_Data.EventCallback(event);
         SHADOW_LOG_INFO("Window Resize Event Triggered: Width = {}, Height = {}", width, height);
-        break;
+        return 0;
     }
     case WM_SETFOCUS:
     {
         WindowFocusEvent event;
-        //m_Data.EventCallback(event);
+        m_Data.EventCallback(event);
         SHADOW_LOG_INFO("Window Focus Event Triggered");
-        break;
+        return 0;
     }
     case WM_KILLFOCUS:
     {
-        WindowFocusEvent event;
-        //m_Data.EventCallback(event);
-        SHADOW_LOG_INFO("Window Focus Event Triggered");
-        break;
+        WindowLostFocusEvent event;
+        m_Data.EventCallback(event);
+        SHADOW_LOG_INFO("Window Focus Lost Event Triggered");
+        return 0;
     }
     default:
         break;
     }
+    return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
 LRESULT CALLBACK WindowsWindow::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -121,11 +142,13 @@ LRESULT CALLBACK WindowsWindow::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, L
     {
         window = reinterpret_cast<WindowsWindow*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
     }
+
     if (window)
-    {
-        window->HandleMessage(msg, wParam, lParam);
-    }
+        return window->HandleMessage(hwnd, msg, wParam, lParam);
+
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
 SHADOW_END_NAMESPACE
+
+#endif // SHADOW_PLATFORM_WINDOWS

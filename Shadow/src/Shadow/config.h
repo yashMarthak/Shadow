@@ -11,6 +11,8 @@
     #else
         #define SHADOW_API __declspec(dllimport)
     #endif
+    
+    #define SHADOW_DEBUG_BREAK() __debugbreak()
 #else
     #error "Only Windows platform is supported!"
 #endif

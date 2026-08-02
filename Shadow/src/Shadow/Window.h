@@ -1,4 +1,5 @@
 #pragma once
+#include "precomp.h"
 
 SHADOW_BEGIN_NAMESPACE
 
@@ -6,12 +7,13 @@ class Event;
 
 struct WindowProps
 {
+    std::wstring Title;
     unsigned int Width;
     unsigned int Height;
-    std::string Title;
+    bool VSync;
 
-    WindowProps(unsigned int width = 1280, unsigned int height = 720, const std::string& title = "Shadow Engine")
-        : Width(width), Height(height), Title(title) {}
+    WindowProps(const std::wstring& title = L"Shadow Engine", unsigned int width = 1280, unsigned int height = 720, bool vsync = true)
+        : Title(title), Width(width), Height(height), VSync(vsync) {}
 };
 
 class SHADOW_API Window

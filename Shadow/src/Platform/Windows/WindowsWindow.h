@@ -1,5 +1,9 @@
 #pragma once
+
+#ifdef SHADOW_PLATFORM_WINDOWS
+
 #include "Shadow/Window.h"
+#include <Windows.h>
 
 SHADOW_BEGIN_NAMESPACE
 
@@ -22,21 +26,23 @@ public:
 private:
     void Init(const WindowProps& props);
     void Shutdown();
-    void HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
+    LRESULT HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 private:
-    HWND m_WindowHandle;
+    HWND m_WindowHandle = nullptr;
 
     struct WindowData
     {
-        std::string Title;
-        unsigned int Width, Height;
-        bool VSync;
-        EventCallbackFn EventCallback;
+        std::wstring Title;
+        unsigned int Width = 0, Height = 0;
+        bool VSync = false;
+        EventCallbackFn EventCallback = [](const Event& event) {};
     };
     WindowData m_Data;
 };
 
 SHADOW_END_NAMESPACE
+
+#endif // SHADOW_PLATFORM_WINDOWS
