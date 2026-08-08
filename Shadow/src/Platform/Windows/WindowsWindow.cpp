@@ -4,10 +4,14 @@
 
 #include "WindowsWindow.h"
 #include "Shadow/Event/ApplicationEvent.h"
+#include "Shadow/Event/KeyboardEvent.h"
+#include "Shadow/Event/MouseEvent.h"
+
+#include <Windows.h>
 
 SHADOW_BEGIN_NAMESPACE
 
-static bool s_WindowInitialized = false;
+static bool s_WindowClassRegistered = false;
 
 Window* Window::Create(const WindowProps& props)
 {
@@ -26,32 +30,32 @@ WindowsWindow::~WindowsWindow()
 
 void WindowsWindow::Init(const WindowProps& props)
 {
-    if (s_WindowInitialized)
+    m_Title = props.Title;
+    m_Width = props.Width;
+    m_Height = props.Height;
+    m_VSync = props.VSync;
+
+    SHADOW_LOG_INFO("Creating window: {0} ({1}, {2})", m_Title, m_Width, m_Height);
+
+    if (s_WindowClassRegistered == false)
     {
-        SHADOW_LOG_ERROR("Window already initialized!");
-        return;
+        WNDCLASS wc = {};
+        wc.lpfnWndProc = WindowsWindow::WindowProc;
+        wc.hInstance = GetModuleHandle(nullptr);
+        wc.lpszClassName = L"ShadowWindowClass";
+        ATOM classAtom = RegisterClass(&wc);
+        SHADOW_ASSERT(classAtom, "Failed to register window class!");
+        s_WindowClassRegistered = true;
     }
 
-    m_Data.Title = props.Title;
-    m_Data.Width = props.Width;
-    m_Data.Height = props.Height;
-    m_Data.VSync = props.VSync;
-
-    SHADOW_LOG_INFO("Creating window: ({0}, {1})", m_Data.Width, m_Data.Height);
-
-    WNDCLASS wc = {};
-    wc.lpfnWndProc = WindowsWindow::WindowProc;
-    wc.hInstance = GetModuleHandle(nullptr);
-    wc.lpszClassName = L"ShadowWindowClass";
-    ATOM classAtom = RegisterClass(&wc);
-    SHADOW_ASSERT(classAtom, "Failed to register window class!");
+    std::wstring wTitle = std::wstring(m_Title.begin(), m_Title.end());
 
     m_WindowHandle = CreateWindowEx(
         0,
         L"ShadowWindowClass",
-        m_Data.Title.c_str(),
+        wTitle.c_str(),
         WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, m_Data.Width, m_Data.Height,
+        CW_USEDEFAULT, CW_USEDEFAULT, m_Width, m_Height,
         nullptr,
         nullptr,
         GetModuleHandle(nullptr),
@@ -61,20 +65,18 @@ void WindowsWindow::Init(const WindowProps& props)
     
     SHADOW_LOG_INFO("Window created successfully!");
     ShowWindow(m_WindowHandle, SW_SHOW);
-
-    s_WindowInitialized = true;
 }
 
 void WindowsWindow::Shutdown()
 {
-    SHADOW_LOG_INFO("Destroying window: ({0}, {1})", m_Data.Width, m_Data.Height);
+    SHADOW_LOG_INFO("Destroying window: {0} ({1}, {2})", m_Title, m_Width, m_Height);
     DestroyWindow(m_WindowHandle);
 }
 
 void WindowsWindow::SetVSync(bool enabled)
 {
-    SHADOW_LOG_TRACE("Setting VSync: {0}", enabled);
-    m_Data.VSync = enabled;
+    // TODO: Implement VSync functionality for Windows platform after renderer is implemented
+    m_VSync = enabled;
 }
 
 void WindowsWindow::OnUpdate()
@@ -91,40 +93,102 @@ LRESULT WindowsWindow::HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
 {
     switch (msg)
     {
-    case WM_CLOSE:
-    {
-        WindowCloseEvent event;
-        m_Data.EventCallback(event);
-        SHADOW_LOG_INFO("Window Close Event Triggered");
-        return 0;
-    }
-    case WM_SIZE:
-    {
-        int width = LOWORD(lParam);
-        int height = HIWORD(lParam);
-        m_Data.Width = width;
-        m_Data.Height = height;
-        WindowResizeEvent event(width, height);
-        m_Data.EventCallback(event);
-        SHADOW_LOG_INFO("Window Resize Event Triggered: Width = {}, Height = {}", width, height);
-        return 0;
-    }
-    case WM_SETFOCUS:
-    {
-        WindowFocusEvent event;
-        m_Data.EventCallback(event);
-        SHADOW_LOG_INFO("Window Focus Event Triggered");
-        return 0;
-    }
-    case WM_KILLFOCUS:
-    {
-        WindowLostFocusEvent event;
-        m_Data.EventCallback(event);
-        SHADOW_LOG_INFO("Window Focus Lost Event Triggered");
-        return 0;
-    }
-    default:
-        break;
+        case WM_CLOSE:
+        {
+            WindowCloseEvent event;
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_SIZE:
+        {
+            m_Width = LOWORD(lParam);
+            m_Height = HIWORD(lParam);
+            WindowResizeEvent event(m_Width, m_Height);
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_SETFOCUS:
+        {
+            WindowFocusEvent event;
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_KILLFOCUS:
+        {
+            WindowLostFocusEvent event;
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_MOVE:
+        {
+            int x = (int)(short)LOWORD(lParam);
+            int y = (int)(short)HIWORD(lParam);
+            WindowMovedEvent event(x, y);
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_KEYDOWN:
+        {
+            int key = (int)wParam;
+            bool isRepeat = (lParam & 0x40000000) != 0;
+            KeyPressedEvent event(key, isRepeat);
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_KEYUP:
+        {
+            int key = (int)wParam;
+            KeyReleasedEvent event(key);
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_LBUTTONDOWN:
+        {
+            MouseButtonPressedEvent event(0); // 0 for left button
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_LBUTTONUP:
+        {
+            MouseButtonReleasedEvent event(0); // 0 for left button
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_RBUTTONDOWN:
+        {
+            MouseButtonPressedEvent event(1); // 1 for right button
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_RBUTTONUP:
+        {
+            MouseButtonReleasedEvent event(1); // 1 for right button
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_MBUTTONDOWN:
+        {
+            MouseButtonPressedEvent event(2); // 2 for middle button
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_MOUSEMOVE:
+        {
+            float x = (float)(short)LOWORD(lParam);
+            float y = (float)(short)HIWORD(lParam);
+            MouseMovedEvent event(x, y);
+            m_EventCallback(event);
+            return 0;
+        }
+        case WM_MOUSEWHEEL:
+        {
+            float delta = GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA;
+            MouseScrolledEvent event(0.0f, delta);
+            m_EventCallback(event);
+            return 0;
+        }
+        default:
+            break;
     }
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }

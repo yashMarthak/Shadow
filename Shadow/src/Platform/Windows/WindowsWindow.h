@@ -13,13 +13,13 @@ public:
     WindowsWindow(const WindowProps& props);
     ~WindowsWindow();
 
-    unsigned int GetWidth() const override { return m_Data.Width; }
-    unsigned int GetHeight() const override { return m_Data.Height; }
+    unsigned int GetWidth() const override { return m_Width; }
+    unsigned int GetHeight() const override { return m_Height; }
 
     void SetVSync(bool enabled) override;
-    bool IsVSync() const override { return m_Data.VSync; }
+    bool IsVSync() const override { return m_VSync; }
 
-    void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+    void SetEventCallback(const EventCallbackFn& callback) override { m_EventCallback = callback; }
 
     void OnUpdate() override;
 
@@ -33,14 +33,10 @@ private:
 private:
     HWND m_WindowHandle = nullptr;
 
-    struct WindowData
-    {
-        std::wstring Title;
-        unsigned int Width = 0, Height = 0;
-        bool VSync = false;
-        EventCallbackFn EventCallback = [](const Event& event) {};
-    };
-    WindowData m_Data;
+    std::string m_Title;
+    unsigned int m_Width = 0, m_Height = 0;
+    bool m_VSync = false;
+    EventCallbackFn m_EventCallback = [](const Event& event) {};
 };
 
 SHADOW_END_NAMESPACE

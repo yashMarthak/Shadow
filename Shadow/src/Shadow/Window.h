@@ -7,12 +7,12 @@ class Event;
 
 struct WindowProps
 {
-    std::wstring Title;
+    std::string Title;
     unsigned int Width;
     unsigned int Height;
     bool VSync;
 
-    WindowProps(const std::wstring& title = L"Shadow Engine", unsigned int width = 1280, unsigned int height = 720, bool vsync = true)
+    WindowProps(const std::string& title = "Shadow Engine", unsigned int width = 1280, unsigned int height = 720, bool vsync = true)
         : Title(title), Width(width), Height(height), VSync(vsync) {}
 };
 

@@ -3,10 +3,10 @@
 
 SHADOW_BEGIN_NAMESPACE
 
-class MouseButtonPressed : public Event
+class MouseButtonPressedEvent : public Event
 {
 public:
-    MouseButtonPressed(int button)
+    MouseButtonPressedEvent(int button)
         : m_Button(button) {}
 
     inline int GetMouseButton() const { return m_Button; }
@@ -25,10 +25,10 @@ private:
     int m_Button;
 };
 
-class MouseButtonReleased : public Event
+class MouseButtonReleasedEvent : public Event
 {
 public:
-    MouseButtonReleased(int button)
+    MouseButtonReleasedEvent(int button)
         : m_Button(button) {}
 
     inline int GetMouseButton() const { return m_Button; }

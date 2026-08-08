@@ -1,10 +1,10 @@
 #pragma once
 #include "Shadow/config.h"
-#include <memory>
 
 SHADOW_BEGIN_NAMESPACE
 
 class Window;
+class Event;
 
 class SHADOW_API Application
 {
@@ -12,10 +12,17 @@ public:
     Application();
     virtual ~Application();
 
+    Application(Application&) = delete;
+    Application& operator=(Application&) = delete;
+
     void Run();
 
 private:
-    std::unique_ptr<class Window> m_Window;
+    void OnEvent(Event& e);
+
+private:
+    bool m_Running = true;
+    Window* m_Window;
 };
 
 // To be defined in CLIENT
